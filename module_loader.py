@@ -37,7 +37,10 @@ class Lahacks_module(nn.Module):
 
 pre_model = Lahacks_pre_module()
 model = Lahacks_module(2048, 6)
-model.load_state_dict(torch.load('static/lahack_model2_15.pth'))
+if torch.cuda.is_available():
+    model.load_state_dict(torch.load('static/lahack_model2_15.pth'))
+else:
+    model.load_state_dict(torch.load('static/lahack_model2_15.pth', map_location=torch.device('cpu')))
 model.eval()
 
 if torch.cuda.is_available():
