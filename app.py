@@ -48,6 +48,13 @@ def analyze():
     output = analyzer.run()
     print('Finish analyzing!')
 
+    output.headers.add("Access-Control-Allow-Origin", "*")
+    output.headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    output.headers.add("Access-Control-Allow-Headers", '*');
+    output.headers.add("Status", "200 OK")
+    output.headers.add("Vary", "Accept")
+    output.headers.add('Content-Type', 'application/octet-stream')
+
     return jsonify(output)
 
 
