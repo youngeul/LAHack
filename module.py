@@ -65,15 +65,16 @@ def predict(imgs):
         inputs.append(input_tensor)
 
     result = []
+    split = 0
     with torch.no_grad():
-        batch = torch.stack(inputs)
-        if torch.cuda.is_available():
-            batch = batch.cuda()
-
-        output = pre_model(batch)
-        output = model(output)
-
-        _, predict = output.max(axis=-1)
-        result.append(predict)
+        while split < len(inputs):
+            batch = torch.stack(inputs[split:split + 128])
+            if torch.cuda.is_available():
+                batch = batch.cuda()
+            output = pre_model(batch)
+            output = model(output)
+            _, predict = output.max(axis=-1)
+            result.append(predict)
+            split += 128
 
     return torch.cat(result).cpu().numpy().tolist()
