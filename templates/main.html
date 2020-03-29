@@ -7,54 +7,69 @@
     <script src="https://kit.fontawesome.com/400112fffc.js" crossorigin="anonymous"></script>
 
     <script>
-        function init() {
+        function set_status(status, last) {
             top_steps = document.querySelectorAll(".top-step");
             top_step_timers = document.querySelectorAll(".top-step > .step-timer > span");
             description = document.querySelector(".left-desc > span");
+
             img = document.querySelector(".left-bottom > img");
+            upload_btn = document.querySelector(".left-bottom > input");
+
             total_time = document.querySelector(".total-timer > span");
             total_status = document.querySelector(".status");
             percentage = document.querySelector(".percentage > span");
             bar = document.querySelector(".bar");
             wiping_img = document.querySelector(".wiping-ch");
+            hand_status = document.querySelectorAll(".hand-div > .hand-status");
 
-            // TODO
-            hand_status = document.querySelector(".hand-div");
+            current_step = status['current'];
+            step_info = status['steps'];
 
-            test = 0
-            interval = setInterval(function(){
-                test += 1;
-                top_step_timers[test % 6].innerText = test;
+            for (let idx=0; idx < top_steps.length; idx++){
+                top_steps[idx].classList.remove("selected");
+                top_step_timers[idx].innerText = step_info['time'][idx];
+                hand_status[idx].style.opacity = (1 - step_info['percent'][idx]);
+            }
+            top_steps[current_step].classList.add("selected");
+            img.classList.remove("hidden");
+            upload_btn.classList.add("hidden");
+            img.src = "./static/frame/frame_"+status['idx']+".jpg";
+
+            percent = status['total']['percent'];
+            total_time.innerText = status['total']['time'];
+            percentage.innerText = Math.round(percent * 100);
+            total_status.style.marginTop = (26 * percent)+"%";
+            bar.style.height = (465 * (1 - percent)) + "px";
+
+            if (last) {
+                wiping_img.src = "./static/wiping_done.gif";
                 for (let idx=0; idx < top_steps.length; idx++){
                     top_steps[idx].classList.remove("selected");
+                    top_steps[idx].classList.add("done");
                 }
-                top_steps[test % 6].classList.add("selected");
-
-                total_time.innerText = test;
-                percentage.innerText = (100 - test);
-                total_status.style.marginTop = (test % 26)+"%";
-                percent = 1 - (test % 26) / 25;
-                bar.style.height = (465 * percent)+"px";
-
-                if (test > 15) {
-                    clearInterval(interval)
-
-                    wiping_img.src = "./static/wiping_done.gif";
-                    for (let idx=0; idx < top_steps.length; idx++){
-                        top_steps[idx].classList.remove("selected");
-                        top_steps[idx].classList.add("done");
-                    }
-                }
-            }, 1 * 1000);
+            }
         }
-
 
         function analyze() {
             let photo = document.getElementById("image-file").files[0];
             let formData = new FormData();
 
             formData.append("photo", photo);
-            fetch('/analyze', {method: "POST", body: formData});
+            fetch('/analyze', {method: "POST", body: formData}).then((response) => {
+                return response.json()
+            }).then((data) => {
+                img = document.querySelector(".left-bottom > img");
+                upload_btn = document.querySelector(".left-bottom > input");
+
+                img.classList.remove("hidden");
+                upload_btn.classList.add("hidden");
+
+                statusz = data['status'];
+                for (const i in statusz) {
+                    last = (i == statusz.length-1);
+                    setTimeout(set_status, i * data['time_per_status'] * 1000, statusz[i], last)
+                }
+            });
         }
     </script>
 
@@ -73,23 +88,17 @@
         .top-step {
             border: 6px solid transparent;
             border-radius: 25px;
-            height: 175px;
+            height: 180px;
             width: 175px;
             margin: 7px 5px 0px 5px;
             display: inline-block;
             background-color: white;
             opacity: 0.4;
         }
-        @keyframes borderBlink {
-            0%{     border-color: #000;    }
-            49%{    border-color: #000; }
-            60%{    border-color: transparent; }
-            99%{    border-color:transparent;  }
-            100%{   border-color: #000;    }
-        }
         .top-step.selected {
             -webkit-animation: borderBlink 1s step-end infinite;
             animation: borderBlink 1s step-end infinite;
+            border: 5px solid black;
             opacity: 1;
         }
         .top-step.done {
@@ -100,7 +109,9 @@
             height: 130px;
         }
         .step-timer {
-            /*margin-top: 75%;*/
+            font-size: 1.6em;
+            background-color: burlywood;
+            border-radius: 0px 0px 21px 21px;
         }
         .step-arrow {
             display: inline-block;
@@ -162,8 +173,9 @@
             height: 100%;
         }
         .hand {
-            max-width: 100%;
-            height: 100%;
+            position: fixed;
+            max-width: 694px;
+            height: 712px;
         }
         .right-info {
             float: right;
@@ -206,6 +218,9 @@
             height: 465px;
             margin: 65px 0px 0px 155px;
             background-image: linear-gradient(crimson, darkorange);
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
@@ -281,11 +296,18 @@
             </div>
             <div class="left-bottom">
                 <input id="image-file" type="file" />
+                <img class="hidden" src="">
             </div>
         </div>
         <div class="right">
             <div class="hand-div">
-                <img class="hand" src="./static/hand.png">
+                <img class="hand" src="./static/hand/hand.png">
+                <img class="hand hand-status" src="./static/hand/hand1.png">
+                <img class="hand hand-status" src="./static/hand/hand2.png">
+                <img class="hand hand-status" src="./static/hand/hand3.png">
+                <img class="hand hand-status" src="./static/hand/hand4.png">
+                <img class="hand hand-status" src="./static/hand/hand5.png">
+                <img class="hand hand-status" src="./static/hand/hand6.png">
             </div>
             <div class="right-info">
                 <div class="total-timer">

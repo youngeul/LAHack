@@ -5,10 +5,12 @@ from PIL import Image
 
 import module
 
+from flask import send_file
+
 TOTAL_WASH_TIME = 24  # total required time for waashing hands
 STEP_WASH_SEC = 4  # required time(seconds) to wash for each step TOTAL_WASH_TIME / 6
 STEP_PERCENT_ROUND = 2  # decimal points rounded up to
-TIME_PER_STATUS = 0.8  # seconds, time per one element in status array
+TIME_PER_STATUS = 0.2  # seconds, time per one element in status array
 
 
 def get_frame_images():
@@ -18,12 +20,16 @@ def get_frame_images():
 
     # frame
     imgs = []
+    idx = 0
     while (True):
         # reading from frame
         ret, frame = cam.read()
         if not ret:
             break
+        cv2.imwrite(f'static/frame/frame_{idx}.jpg', frame)
         imgs.append(Image.fromarray(frame))
+        idx += 1
+
 
     # Release all space and windows once done
     cam.release()
@@ -52,13 +58,14 @@ def createJson(predicted, fps):
 
             status.append({
                 "current": pred,
+                "idx": i-1,
                 "steps": {
                     "time": [round(s, 2) for s in step_time],
-                    "percent": [round((s / STEP_WASH_SEC) * 100, STEP_PERCENT_ROUND) for s in step_time]
+                    "percent": [(s / STEP_WASH_SEC) for s in step_time]
                 },
                 "total": {
-                    "time": total_time,
-                    "percent": round((total_time / TOTAL_WASH_TIME) * 100)
+                    "time": round(total_time),
+                    "percent": total_time / TOTAL_WASH_TIME
                 }
             })
 
