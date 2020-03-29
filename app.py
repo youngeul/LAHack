@@ -34,6 +34,11 @@ def index():
     # return render_template('main.html')
     return render_template('main.html')
 
+
+@app.route("/m")
+def mobile():
+    return render_template('mobile.html')
+
 @app.route('/analyze', methods = ['POST'])
 def analyze():
     print('Start analyzing...')
