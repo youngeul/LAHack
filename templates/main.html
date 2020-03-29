@@ -295,8 +295,12 @@
                 </div>
             </div>
             <div class="left-bottom">
-                <input id="image-file" type="file" />
-                <img class="hidden" src="">
+                <!-- <input id="image-file" type="file" />
+                <img class="hidden" src=""> -->
+                <form action="/" method="POST" enctype="multipart/form-data">
+                    <input id="fileUpload" type="file" name="video"/>
+                    <button type="submit">Submit</button>
+                </form>
             </div>
         </div>
         <div class="right">
