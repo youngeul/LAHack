@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, redirect
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import analyzer
 import os
 from werkzeug.utils import secure_filename
@@ -42,7 +42,9 @@ def index():
 def mobile():
     return render_template('mobile.html')
 
+
 @app.route('/analyze', methods = ['POST'])
+@cross_origin(origin='localhost',headers=['Content- Type','Authorization'])
 def analyze():
     print('Start analyzing...')
     output = analyzer.run()
