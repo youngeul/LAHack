@@ -61,29 +61,33 @@
         }
 
         function analyze() {
-            let loading = document.querySelector(".loading-background");
-            loading.classList.remove("hidden");
+            document.querySelector(".loading-background").classList.remove("hidden");
 
-            let photo = document.getElementById("image-file").files[0];
-            let formData = new FormData();
+            var http = new XMLHttpRequest();
+            var url = '/analyze';
+            http.open('POST', url, true);
 
-            formData.append("photo", photo);
-            fetch('/analyze', {method: "POST", body: formData}).then((response) => {
-                loading.classList.add("hidden");
-                return response.json()
-            }).then((data) => {
-                let img = document.querySelector(".left-bottom > img");
-                let upload_btn = document.querySelector(".left-bottom > input");
+            http.onreadystatechange = function() {//Call a function when the state changes.
+                document.querySelector(".loading-background").classList.add("hidden");
+                if(http.readyState == 4 && http.status == 200) {
+                    console.log(http.responseText);
+                    data = JSON.parse(http.responseText);
+                    console.log(data);
 
-                img.classList.remove("hidden");
-                upload_btn.classList.add("hidden");
+                    let img = document.querySelector(".left-bottom > img");
+                    let upload_btn = document.querySelector(".left-bottom > input");
 
-                let statusz = data['status'];
-                for (const i in statusz) {
-                    let last = (i == statusz.length-1);
-                    setTimeout(set_status, i * data['time_per_status'] * 1000, statusz[i], last)
+                    img.classList.remove("hidden");
+                    upload_btn.classList.add("hidden");
+
+                    let statusz = data['status'];
+                    for (const i in statusz) {
+                        let last = (i == statusz.length-1);
+                        setTimeout(set_status, i * data['time_per_status'] * 1000, statusz[i], last)
+                    }
                 }
-            });
+            };
+            http.send();
         }
     </script>
 
