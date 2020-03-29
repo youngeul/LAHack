@@ -31,6 +31,13 @@ def analyze():
     print (predicted)
     print (len(predicted))
 
+    output = createJson(predicted)
+    result = jsonify(output)
+    print(output)
+    
+    return result
+
+def createJson(predicted):
     ## variables initialization 
     status = list() 
     current = 0
@@ -72,11 +79,7 @@ def analyze():
         "time_per_status" : TIME_PER_STATUS, 
         "status" : status
     }
-    result = jsonify(output)
-    print(output)
-    print("num status: ", len(status))
-    return result
-
+    return output
 
 if __name__ == "__main__":
 	app.run(debug = True, host='0.0.0.0', port=8080, passthrough_errors=True)
