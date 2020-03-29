@@ -1,6 +1,16 @@
 import torch
 import torch.nn as nn
 import torchvision.models as models
+import torchvision.transforms as transforms
+
+
+preprocess = transforms.Compose([
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+])
+
 
 class Identity(nn.Module):
     def __init__(self):
@@ -48,5 +58,23 @@ if torch.cuda.is_available():
     model.cuda()
 
 
-def load_module():
-    return pre_model, model
+def predict(imgs):
+    inputs = []
+    for img in imgs:
+        input_tensor = preprocess(img)
+        inputs.append(input_tensor)
+
+    result = []
+    split = 0
+    with torch.no_grad():
+        while split < len(inputs):
+            batch = torch.stack(inputs[split:split + 32])
+            if torch.cuda.is_available():
+                batch = batch.cuda()
+            output = pre_model(batch)
+            output = model(output)
+            _, predict = output.max(axis=-1)
+            result.append(predict)
+            split += 32
+
+    return torch.cat(result).cpu().numpy().tolist()
