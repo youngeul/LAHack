@@ -17,22 +17,22 @@
         ];
 
         function set_status(status, last) {
-            top_steps = document.querySelectorAll(".top-step");
-            top_step_timers = document.querySelectorAll(".top-step > .step-timer > span");
-            description = document.querySelector(".left-desc > span");
+            let top_steps = document.querySelectorAll(".top-step");
+            let top_step_timers = document.querySelectorAll(".top-step > .step-timer > span");
+            let description = document.querySelector(".left-desc > span");
 
-            img = document.querySelector(".left-bottom > img");
-            upload_btn = document.querySelector(".left-bottom > input");
+            let img = document.querySelector(".left-bottom > img");
+            let upload_btn = document.querySelector(".left-bottom > input");
 
-            total_time = document.querySelector(".total-timer > span");
-            total_status = document.querySelector(".status");
-            percentage = document.querySelector(".percentage > span");
-            bar = document.querySelector(".bar");
-            wiping_img = document.querySelector(".wiping-ch");
-            hand_status = document.querySelectorAll(".hand-div > .hand-status");
+            let total_time = document.querySelector(".total-timer > span");
+            let total_status = document.querySelector(".status");
+            let percentage = document.querySelector(".percentage > span");
+            let bar = document.querySelector(".bar");
+            let wiping_img = document.querySelector(".wiping-ch");
+            let hand_status = document.querySelectorAll(".hand-div > .hand-status");
 
-            current_step = status['current'];
-            step_info = status['steps'];
+            let current_step = status['current'];
+            let step_info = status['steps'];
 
             for (let idx=0; idx < top_steps.length; idx++){
                 top_steps[idx].classList.remove("selected");
@@ -45,7 +45,7 @@
             upload_btn.classList.add("hidden");
             img.src = "./static/frame/frame_"+status['idx']+".jpg";
 
-            percent = status['total']['percent'];
+            let percent = status['total']['percent'];
             total_time.innerText = status['total']['time'];
             percentage.innerText = Math.round(percent * 100);
             total_status.style.marginTop = (26 * percent)+"%";
@@ -61,7 +61,7 @@
         }
 
         function analyze() {
-            loading = document.querySelector(".loading-background");
+            let loading = document.querySelector(".loading-background");
             loading.classList.remove("hidden");
 
             let photo = document.getElementById("image-file").files[0];
@@ -72,15 +72,15 @@
                 loading.classList.add("hidden");
                 return response.json()
             }).then((data) => {
-                img = document.querySelector(".left-bottom > img");
-                upload_btn = document.querySelector(".left-bottom > input");
+                let img = document.querySelector(".left-bottom > img");
+                let upload_btn = document.querySelector(".left-bottom > input");
 
                 img.classList.remove("hidden");
                 upload_btn.classList.add("hidden");
 
-                statusz = data['status'];
+                let statusz = data['status'];
                 for (const i in statusz) {
-                    last = (i == statusz.length-1);
+                    let last = (i == statusz.length-1);
                     setTimeout(set_status, i * data['time_per_status'] * 1000, statusz[i], last)
                 }
             });
