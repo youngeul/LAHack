@@ -15,7 +15,7 @@ TIME_PER_STATUS = 0.2  # seconds, time per one element in status array
 
 def get_frame_images():
     # Read the video from specified path
-    cam = cv2.VideoCapture("static/demo.mp4")
+    cam = cv2.VideoCapture("static/demo_modified.mp4")
     fps = cam.get(cv2.CAP_PROP_FPS)
 
     # frame
@@ -29,7 +29,6 @@ def get_frame_images():
         cv2.imwrite(f'static/frame/frame_{idx}.jpg', frame)
         imgs.append(Image.fromarray(frame))
         idx += 1
-
 
     # Release all space and windows once done
     cam.release()
@@ -45,27 +44,33 @@ def createJson(predicted, fps):
     # variables initialization
     status = list()
     step_time = [0, ] * 6
+    idxs = [0, ] * 6
 
     # parse the predicted data from model and create json for frontend
     len_predicted = len(predicted)
     for i, pred in enumerate(predicted):
         i += 1
-        step_time[pred] += TIME_PER_FRAME
+        idxs[pred] += 1
 
         # save to json every STATUS_FRAME_CNT frames
         if i % STATUS_FRAME_CNT == 0 or i == len_predicted - 1:
             total_time = i * TIME_PER_FRAME
 
+            max_cnt = max(idxs)
+            max_idxs = [i for i, c in enumerate(idxs) if c == max_cnt][0]
+            step_time[max_idxs] += TIME_PER_STATUS
+            idxs = [0, ] * 6
+
             status.append({
-                "current": pred,
+                "current": max_idxs,
                 "idx": i-1,
                 "steps": {
                     "time": [round(s, 2) for s in step_time],
-                    "percent": [(s / STEP_WASH_SEC) for s in step_time]
+                    "percent": [min(1., s / STEP_WASH_SEC) for s in step_time]
                 },
                 "total": {
                     "time": round(total_time),
-                    "percent": total_time / TOTAL_WASH_TIME
+                    "percent": sum([min(1., s / STEP_WASH_SEC) for s in step_time]) / 6
                 }
             })
 
@@ -84,6 +89,6 @@ def run():
 
     print("Convert to json object")
     output = createJson(predicted, fps)
-    pprint(output)
+    # pprint(output)
 
     return output

@@ -7,6 +7,15 @@
     <script src="https://kit.fontawesome.com/400112fffc.js" crossorigin="anonymous"></script>
 
     <script>
+        description_text = [
+            'Rub hands palm to palm',
+            'Right palm over left dorsum with interlaced fingers and vice versa',
+            'Palm to palm with fingers interlaced',
+            'Backs of fingers to opposing palms with fingers interlocked',
+            'Rotational rubbing of left thumb clasped in right palm and vice versa',
+            'Rotational rubbing, backwards and forwards with clasped fingers of right hand in left palm and vice versa',
+        ];
+
         function set_status(status, last) {
             top_steps = document.querySelectorAll(".top-step");
             top_step_timers = document.querySelectorAll(".top-step > .step-timer > span");
@@ -31,6 +40,7 @@
                 hand_status[idx].style.opacity = (1 - step_info['percent'][idx]);
             }
             top_steps[current_step].classList.add("selected");
+            description.innerText = description_text[current_step]
             img.classList.remove("hidden");
             upload_btn.classList.add("hidden");
             img.src = "./static/frame/frame_"+status['idx']+".jpg";
@@ -51,11 +61,15 @@
         }
 
         function analyze() {
+            loading = document.querySelector(".loading-background");
+            loading.classList.remove("hidden");
+
             let photo = document.getElementById("image-file").files[0];
             let formData = new FormData();
 
             formData.append("photo", photo);
             fetch('/analyze', {method: "POST", body: formData}).then((response) => {
+                loading.classList.add("hidden");
                 return response.json()
             }).then((data) => {
                 img = document.querySelector(".left-bottom > img");
@@ -93,7 +107,7 @@
             margin: 7px 5px 0px 5px;
             display: inline-block;
             background-color: white;
-            opacity: 0.4;
+            opacity: 0.7;
         }
         .top-step.selected {
             -webkit-animation: borderBlink 1s step-end infinite;
@@ -103,6 +117,9 @@
         }
         .top-step.done {
             opacity: 1;
+        }
+        .top-step.done > .step-timer {
+            font-weight: bold;
         }
         .top-step img {
             width: 165px;
@@ -163,7 +180,7 @@
             float: right;
             width: 65%;
             height: 95%;
-            margin: 10px;
+            margin-right: 10px;
         }
         .hand-div {
             display: block;
@@ -176,6 +193,12 @@
             position: fixed;
             max-width: 694px;
             height: 712px;
+        }
+        .index{
+            position: absolute;
+            bottom: 0;
+            height: 30px;
+            margin-left: 68px;
         }
         .right-info {
             float: right;
@@ -222,9 +245,42 @@
         .hidden {
             display: none;
         }
+        .loading-background {
+            position: absolute;
+            z-index: 99999;
+            width: 100%;
+            height: 100%;
+        }
+        .modal {
+            position: absolute;
+            background-color: white;
+            opacity: 0.85;
+            width: 100%;
+            height: 100%;
+        }
+        .loading-img {
+            max-height: 400px;
+            position: absolute;
+            z-index: 99999;
+            margin-left: calc(50% - 200px);
+            margin-top: calc(25% - 200px);
+        }
+        .loading-background > .text {
+            font-size: 2em;
+            font-weight: 900;
+            z-index: 99999;
+            position: absolute;
+            margin-left: calc(50% - 89px);
+            margin-top: calc(25% + 200px);
+        }
     </style>
 </head>
 <body>
+    <div class="loading-background hidden">
+        <div class="modal"></div>
+        <img class="loading-img" src="./static/loading.gif">
+        <span class="text">LOADING ...</span>
+    </div>
     <div class="top">
         <div class="top-step">
             <div>Step 1</div>
@@ -246,7 +302,7 @@
                 <i class="fas fa-angle-double-right"></i>
             </span>
         </div>
-        <div class="top-step selected">
+        <div class="top-step">
             <div>Step 3</div>
             <img class="" src="./static/step3.png">
             <div class="step-timer"><span>0</span> seconds</div>
@@ -295,7 +351,7 @@
                 </div>
             </div>
             <div class="left-bottom">
-                <input id="image-file" type="file" />
+                <input id="image-file" type="file" onchange="analyze()"/>
                 <img class="hidden" src="">
             </div>
         </div>
@@ -308,6 +364,7 @@
                 <img class="hand hand-status" src="./static/hand/hand4.png">
                 <img class="hand hand-status" src="./static/hand/hand5.png">
                 <img class="hand hand-status" src="./static/hand/hand6.png">
+                <img class="index" src="./static/hand/index.png">
             </div>
             <div class="right-info">
                 <div class="total-timer">
@@ -321,7 +378,7 @@
                         </div>
 
                         <div class="percentage">
-                            <span>100</span> %
+                            <span>0</span> %
                         </div>
                     </div>
                     <div class="bar">
